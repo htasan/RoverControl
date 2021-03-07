@@ -2,17 +2,16 @@ package com.rovercontrol.io;
 
 import com.rovercontrol.enums.Command;
 import com.rovercontrol.enums.Direction;
-import com.rovercontrol.exception.InputReaderException;
+import com.rovercontrol.exception.InputRuleException;
 import com.rovercontrol.model.Plateau;
 import com.rovercontrol.model.Rover;
 
-import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.Scanner;
 
 public class InputReader {
 
-    public Plateau createPlateau(String fileName) throws InputReaderException {
+    public Plateau createPlateau(String fileName) throws InputRuleException {
         Plateau plateau = new Plateau();
         Scanner in = createFileScanner(fileName);
         readPlateauProperties(plateau, in);
@@ -20,44 +19,56 @@ public class InputReader {
         return plateau;
     }
 
-    private Scanner createFileScanner(String fileName) throws InputReaderException {
+    private Scanner createFileScanner(String fileName) throws InputRuleException {
         try {
-            URL url = getClass().getClassLoader().getResource(fileName);
-            File file = new File(url.getPath());
-            return new Scanner(file);
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName);
+            return new Scanner(inputStream);
         } catch (Exception e) {
-            throw new InputReaderException(String.format("%s could not be found in resources", fileName), e);
+            throw new InputRuleException(String.format("%s could not be found in resources", fileName), e);
         }
     }
 
-    private void readPlateauProperties(Plateau plateau, Scanner in) throws InputReaderException {
+    private void readPlateauProperties(Plateau plateau, Scanner in) throws InputRuleException {
+        int length;
+        int width;
         try {
-            plateau.setLength(in.nextInt());
-            plateau.setWidth(in.nextInt());
+            length = in.nextInt();
+            width = in.nextInt();
         } catch (Exception e) {
-            throw new InputReaderException("Plateau properties could not be read", e);
+            throw new InputRuleException("Plateau properties could not be read", e);
         }
+        if (length < 0 || width < 0) {
+            throw new InputRuleException("Both dimensions of plateau should be positive");
+        }
+        plateau.setLength(length);
+        plateau.setWidth(width);
     }
 
-    private void readRovers(Plateau plateau, Scanner in) throws InputReaderException {
+    private void readRovers(Plateau plateau, Scanner in) throws InputRuleException {
         int id = 0;
         while (in.hasNext()) {
             readRover(plateau, in, ++id);
         }
     }
 
-    private void readRover(Plateau plateau, Scanner in, int id) throws InputReaderException {
+    private void readRover(Plateau plateau, Scanner in, int id) throws InputRuleException {
         Rover rover;
         try {
             rover = new Rover(id, in.nextInt(), in.nextInt(), Direction.valueOf(in.next()));
         } catch (Exception e) {
-            throw new InputReaderException(String.format("Position info for Rover%d could not be read", id), e);
+            throw new InputRuleException(String.format("Position info for Rover%d could not be read", id), e);
+        }
+        if (!rover.isInPlateau(plateau.getLength(), plateau.getWidth())) {
+            throw new InputRuleException(String.format("%s cannot be positioned on %s, which is out of plateau", rover.getName(), rover.getPosition()));
+        }
+        if (plateau.getRoverList().stream().anyMatch(rover::onSamePosition)) {
+            throw new InputRuleException(String.format("%s cannot be positioned on %s because there is another rover there", rover.getName(), rover.getPosition()));
         }
         readCommands(rover, in);
         plateau.addRover(rover);
     }
 
-    private void readCommands(Rover rover, Scanner in) throws InputReaderException {
+    private void readCommands(Rover rover, Scanner in) throws InputRuleException {
         try {
             in.nextLine();
             String commands = in.nextLine();
@@ -65,7 +76,7 @@ public class InputReader {
                 rover.addCommand(Command.valueOf(Character.toString(command)));
             }
         } catch (Exception e) {
-            throw new InputReaderException(String.format("Command info for %s could not be read", rover.getName()), e);
+            throw new InputRuleException(String.format("Command info for %s could not be read", rover.getName()), e);
         }
     }
 }

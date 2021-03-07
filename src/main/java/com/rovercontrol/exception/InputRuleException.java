@@ -1,12 +1,12 @@
 package com.rovercontrol.exception;
 
-public class InputReaderException extends Exception {
+public class InputRuleException extends Exception {
 
-    public InputReaderException(String message) {
+    public InputRuleException(String message) {
         super(message);
     }
 
-    public InputReaderException(String message, Throwable cause) {
+    public InputRuleException(String message, Throwable cause) {
         super(message, cause);
     }
 }

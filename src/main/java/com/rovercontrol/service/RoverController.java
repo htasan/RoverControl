@@ -15,6 +15,7 @@ public class RoverController {
         }
         Direction[] directions = Direction.values();
         rover.setDir(directions[(rover.getDir().ordinal() + directions.length - 1) % directions.length]);
+        setOnPositionInfo(rover);
     }
 
     public void turnRight(Rover rover) {
@@ -23,6 +24,7 @@ public class RoverController {
         }
         Direction[] directions = Direction.values();
         rover.setDir(directions[(rover.getDir().ordinal() + 1) % directions.length]);
+        setOnPositionInfo(rover);
     }
 
     public void moveForward(Rover rover, Plateau plateau) {
@@ -38,6 +40,10 @@ public class RoverController {
         if (rover.isDead()) {
             return;
         }
+        setOnPositionInfo(rover);
+    }
+
+    private void setOnPositionInfo(Rover rover) {
         rover.setInfo(rover.getName() + " is on position " + rover.getPosition());
     }
 
@@ -47,15 +53,11 @@ public class RoverController {
     }
 
     private void controlInPlateau(Rover rover, int plateauLength, int plateauWidth) {
-        if (isInPlateau(rover, plateauLength, plateauWidth)) {
+        if (rover.isInPlateau(plateauLength, plateauWidth)) {
             return;
         }
         rover.setInfo(rover.getName() + " has gone off plateau. Last seen on position " + rover.getPreviousPosition());
         rover.setDead(true);
-    }
-
-    private boolean isInPlateau(Rover rover, int plateauLength, int plateauWidth) {
-        return rover.getX() >= 0 && rover.getX() <= plateauLength && rover.getY() >= 0 && rover.getY() <= plateauWidth;
     }
 
     private void controlCrash(Rover rover, List<Rover> roverList) {
@@ -73,10 +75,7 @@ public class RoverController {
                 + " has crashed " + crashedRovers.stream().map(Rover::getName).collect(Collectors.joining(", "))
                 + " on position " + rover.getPosition());
         rover.setDead(true);
-        crashedRovers.forEach(otherRover -> {
-            if (otherRover.isDead()) {
-                return;
-            }
+        crashedRovers.stream().filter(Rover::isAlive).forEach(otherRover -> {
             otherRover.setInfo(otherRover.getName()
                     + " got hit by " + rover.getName()
                     + " while standing on position " + otherRover.getPosition());

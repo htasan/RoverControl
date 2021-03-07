@@ -21,6 +21,7 @@ public class Rover {
         this.x = x;
         this.y = y;
         this.dir = dir;
+        this.info = getName() + " is on position " + getPosition();
     }
 
     public int getX() {
@@ -63,6 +64,10 @@ public class Rover {
         this.isDead = isDead;
     }
 
+    public boolean isAlive() {
+        return !isDead;
+    }
+
     public String getInfo() {
         return info;
     }
@@ -85,5 +90,9 @@ public class Rover {
 
     public boolean onSamePosition(Rover rover) {
         return x == rover.getX() && y == rover.getY();
+    }
+
+    public boolean isInPlateau(int plateauLength, int plateauWidth) {
+        return x >= 0 && x <= plateauLength && y >= 0 && y <= plateauWidth;
     }
 }

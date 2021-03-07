@@ -1,4 +1,4 @@
 - Modify input data in `resources/input.txt`
-- Run locally using Maven commands below:
+- Run with Maven commands in project directory:
     - `mvn clean compile`
     - `mvn exec:java`
