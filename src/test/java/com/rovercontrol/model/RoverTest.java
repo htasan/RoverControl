@@ -41,5 +41,10 @@ public class RoverTest {
         Rover rover1 = new Rover(1, 3, 2, Direction.W);
         assertTrue(rover1.isInPlateau(3, 2));
         assertFalse(rover1.isInPlateau(2, 2));
+        assertFalse(rover1.isInPlateau(3, 1));
+        Rover rover2 = new Rover(1, -1, 2, Direction.W);
+        assertFalse(rover2.isInPlateau(3, 1));
+        Rover rover3 = new Rover(1, 3, -1, Direction.W);
+        assertFalse(rover3.isInPlateau(3, 3));
     }
 }
