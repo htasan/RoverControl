@@ -49,7 +49,7 @@ public class RoverController {
 
     private void move(Rover rover) {
         rover.setX(rover.getX() + rover.getDir().getX());
-        rover.setY(rover.getY()  + rover.getDir().getY());
+        rover.setY(rover.getY() + rover.getDir().getY());
     }
 
     private void controlInPlateau(Rover rover, int plateauLength, int plateauWidth) {
